@@ -15,6 +15,8 @@ import Gallery from './pages/Gallery';
 import FAQ from './pages/FAQ';
 import Testimonials from './pages/Testimonials';
 import Contact from './pages/Contact';
+import Admin from './pages/Admin';
+import Sell from './pages/Sell';
 
 function ServiceWorkerRegistrar() {
   useEffect(() => {
@@ -45,7 +47,8 @@ export default function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/testimonials" element={<Testimonials />} />
             <Route path="/contact" element={<Contact />} />
-            {/* Catch-all → Home */}
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/sell" element={<Sell />} />
             <Route path="*" element={<Home />} />
           </Routes>
         </main>
@@ -53,7 +56,6 @@ export default function App() {
         <Footer />
       </div>
 
-      {/* Global utility components */}
       <FloatingWhatsApp />
       <PWAInstall />
       <MobileBottomMenu />
