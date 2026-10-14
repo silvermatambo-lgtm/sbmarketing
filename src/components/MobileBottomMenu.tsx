@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Layers, Phone } from 'lucide-react';
+import { Home, Layers, Phone, Shield } from 'lucide-react';
 
 const WA_ICON = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -15,11 +15,12 @@ export default function MobileBottomMenu() {
     { label: 'Products', to: '/services', icon: <Layers size={20} /> },
     { label: 'WhatsApp', to: null, href: 'https://wa.me/27844979827?text=Hi%2C%20I%20would%20like%20to%20enquire%20about%20motorsport%20items.', icon: <WA_ICON />, green: true },
     { label: 'Contact', to: '/contact', icon: <Phone size={20} /> },
+    { label: 'Admin', to: '/admin', icon: <Shield size={20} /> },
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-stone-900 border-t border-stone-700 pb-safe">
-      <div className="grid grid-cols-4">
+      <div className="grid grid-cols-5">
         {items.map((item) => {
           const active = item.to && pathname === item.to;
 
