@@ -43,7 +43,7 @@ export default function Admin() {
 
   async function login(e: React.FormEvent) {
     e.preventDefault(); setBusy(true); setError(''); setNotice('');
-    try { await signIn(password); setAuthenticated(true); setPassword(''); await refresh(); }
+    try { await signIn(password); setAuthenticated(true); setPassword(''); await refresh(); if (savedLocally.length) await importSaved(true); }
     catch(e) { setError(errText(e)); } finally { setBusy(false); }
   }
   async function logout() {
@@ -91,8 +91,8 @@ export default function Admin() {
     catch(e) { setError(errText(e)); } finally { setBusy(false); }
   }
 
-  async function importSaved() {
-    if (!window.confirm('Import previously saved items from this browser to the shared website database? Existing matching items will not be overwritten.')) return;
+  async function importSaved(automatic = false) {
+    if (!automatic && !window.confirm('Import previously saved items from this browser to the shared website database? Existing matching items will not be overwritten.')) return;
     setBusy(true); setError(''); setNotice('');
     let count = 0;
     try {
