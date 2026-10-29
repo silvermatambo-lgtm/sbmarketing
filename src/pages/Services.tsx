@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 import { useInView } from '../hooks/useInView';
+import { useProducts } from '../hooks/useProducts';
 
 function Reveal({ children, className = '', delay = '' }: { children: React.ReactNode; className?: string; delay?: string }) {
   const { ref, inView } = useInView();
@@ -63,6 +64,7 @@ const SERVICES = [
 ];
 
 export default function Services() {
+  const { products, loading, error } = useProducts();
   return (
     <div className="page-enter pt-24">
       {/* Header */}
@@ -113,6 +115,23 @@ export default function Services() {
         </div>
       </section>
 
+
+      <section className="py-16 bg-stone-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-stone-900 mb-2">Current Collection</h2>
+          <p className="text-stone-600 mb-8">Browse the latest available items.</p>
+          {loading && <p className="mb-5">Loading latest products...</p>}
+          {error && <p role="alert" className="text-red-600 mb-5">{error}</p>}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {products.map(p=><article key={p.id} className="rounded-2xl bg-white overflow-hidden shadow-md">
+              <img src={p.image} alt={p.name} className="w-full h-48 object-cover" loading="lazy" />
+              <div className="p-5"><span className="text-red-600 text-xs font-bold uppercase">{p.category}</span><h3 className="font-bold text-lg mt-1">{p.name}</h3><p className="text-stone-600 text-sm mt-2">{p.description}</p>
+                {p.price && <p className="text-red-600 font-semibold mt-2">{p.price}</p>}
+                <Link to="/contact" className="inline-flex items-center gap-1 mt-4 text-red-600 font-semibold">Enquire <ArrowRight size={15}/></Link>
+              </div></article>)}
+          </div>
+        </div>
+      </section>
       {/* CTA */}
       <section className="py-16 bg-stone-50">
         <div className="max-w-3xl mx-auto px-4 text-center">

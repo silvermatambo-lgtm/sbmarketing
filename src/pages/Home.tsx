@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { BookOpen, Camera, Flag, CheckCircle, ArrowRight, Phone, Trophy, Tag } from 'lucide-react';
 import HeroSlider from '../components/HeroSlider';
 import { useInView } from '../hooks/useInView';
-import { getProducts } from '../data/products';
+import { useProducts } from '../hooks/useProducts';
 
 function SectionReveal({ children, className = '', delay = '' }: { children: React.ReactNode; className?: string; delay?: string }) {
   const { ref, inView } = useInView();
@@ -10,7 +10,7 @@ function SectionReveal({ children, className = '', delay = '' }: { children: Rea
 }
 
 export default function Home() {
-  const products = getProducts();
+  const { products, loading, error } = useProducts();
   return (
     <div className="page-enter">
       <HeroSlider />
@@ -21,6 +21,8 @@ export default function Home() {
       <section className="py-20 bg-stone-50">
         <div className="max-w-7xl mx-auto px-4">
           <SectionReveal className="text-center mb-10"><span className="section-tag">What We Offer</span><h2 className="section-heading text-center">Our Products & Collectables</h2><div className="gold-bar mx-auto" /><p className="text-stone-500 max-w-2xl mx-auto mt-2">Browse our current collection of classic motorsport literature and memorabilia. New items can be added by the owner every week.</p></SectionReveal>
+          {loading && <p className="text-center mb-4 text-stone-600">Loading the latest collection...</p>}
+          {error && <p role="alert" className="text-red-600 text-center mb-4">{error}</p>}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
             {products.map((mat, i) => <SectionReveal key={mat.id} delay={`delay-${(i % 3 + 1) * 100}`}><Link to="/services" className="block group rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"><div className="gallery-item h-52 relative"><img src={mat.image} alt={mat.name} className="w-full h-full object-cover" loading="lazy"/><div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"/><div className="absolute bottom-0 left-0 p-4"><span className="text-red-300 text-[10px] uppercase tracking-wider font-bold">{mat.category}</span><h3 className="text-white font-bold text-lg">{mat.name}</h3><p className="text-stone-200 text-xs mt-0.5">{mat.description}</p>{mat.price && <p className="text-white font-semibold text-sm mt-1">{mat.price}</p>}</div></div></Link></SectionReveal>)}
           </div>
