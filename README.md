@@ -1,33 +1,25 @@
 # S&B Marketing Motor Sport
 
-Official website for S&B Marketing Motor Sport — We buy and sell classic motorsport literature and memorabilia.
+React + Vite + Tailwind website with Neon PostgreSQL catalogue, Vercel Blob image uploads and Vercel Functions backend.
 
-## Features
+## Required project configuration
 
-- Multi-page React + Vite + Tailwind site
-- Hero slider with classic motorsport imagery
-- Products catalogue (posters, photos, books, magazines, memorabilia)
-- Gallery, FAQ, Testimonials, Contact form
-- Floating WhatsApp assistant
-- PWA ready
-- Responsive design optimised for South African collectors
+In Vercel environment variables configure:
+- `DATABASE_URL`: Neon project sbmarketing pooled PostgreSQL connection string (server-only).
+- `ADMIN_PASSWORD`: strong password used by the owner (server-only).
+- `ADMIN_SESSION_SECRET`: random 32+ byte secret for signed admin session cookie (server-only).
+- `BLOB_READ_WRITE_TOKEN`: auto-provisioned when connecting Vercel Blob to this project.
 
-## Contact
+Never use VITE_ prefixes for secrets or commit an .env with values.
 
-- Email: Sue@sbmarketing.co.za
-- Phone: 087 701 3872 / 084 497 9827 / 073 638 2240
+## Upgrade from local browser catalogue
+Previously uploaded items were saved to each admin browser under localStorage key `sbmarketing-products-v1`. The owner MUST use the same original device/browser and hostname, sign in to /admin after deployment, then click **Import Saved Browser Items**. The import uploads data URL photos to Blob and records them in Neon, skipping products already in the database. Browser local storage is not remotely retrievable by the developer.
 
-## Development
+## Verify
+1. Configure Vercel secrets and deploy.
+2. Visit /api/products and confirm a JSON response with seeded products.
+3. Sign into /admin, import saved browser items, add a new item with photo.
+4. Open the homepage in a private browser on a second device; ensure the new item and photo are visible.
+5. Delete the test item in admin and ensure it disappears after refreshing the public site.
 
-```bash
-npm install
-npm run dev
-```
-
-## Build
-
-```bash
-npm run build
-```
-
-Deploy the `dist` folder to Vercel, Netlify or any static host. Framework = Vite, Build = `npm run build`, Output = `dist`.
+The public catalogue refreshes on focus and every 30 seconds while visible.

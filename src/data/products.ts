@@ -20,22 +20,49 @@ export const DEFAULT_PRODUCTS: Product[] = [
 
 const STORAGE_KEY = 'sbmarketing-products-v1';
 
-export function getProducts(): Product[] {
-  if (typeof window === 'undefined') return DEFAULT_PRODUCTS;
-  try {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved) return DEFAULT_PRODUCTS;
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) ? parsed : DEFAULT_PRODUCTS;
-  } catch {
-    return DEFAULT_PRODUCTS;
+async function api<T>(path: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(path, { credentials: 'same-origin', cache: 'no-store', ...options });
+  let result: Record<string, unknown>;
+  try { result = await response.json(); } catch { throw new Error('Could not contact the server'); }
+  if (!response.ok) throw new Error(typeof result.error === 'string' ? result.error : 'Request failed');
+  return result as T;
+}
+
+export async function fetchProducts(): Promise<Product[]> {
+  return (await api<{products: Product[]}>('/api/products')).products;
+}
+
+export async function checkAdmin(): Promise<boolean> {
+  return (await api<{authenticated: boolean}>('/api/auth')).authenticated;
+}
+export async function signIn(password: string): Promise<void> {
+  await api('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password}) });
+}
+export async function signOut(): Promise<void> {
+  await api('/api/auth', { method:'DELETE' });
+}
+export async function saveProduct(product: Omit<Product,'id'> | Product, importExisting=false): Promise<boolean> {
+  const result = await api<{inserted: boolean}>('/api/products', {
+    method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({...product, importExisting})
+  });
+  return result.inserted;
+}
+export async function removeProduct(id: string): Promise<void> {
+  await api('/api/products?id=' + encodeURIComponent(id), {method:'DELETE'});
+}
+export async function uploadImage(file: File): Promise<string> {
+  if (!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type) || file.size > 3*1024*1024) {
+    throw new Error('Choose a JPG, PNG, WebP or GIF under 3MB.');
   }
+  const result = await api<{url: string}>('/api/upload', {
+    method:'POST', headers:{'Content-Type':file.type}, body:file
+  });
+  return result.url;
 }
-
-export function saveProducts(products: Product[]) {
-  if (typeof window !== 'undefined') window.localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-}
-
-export function resetProducts() {
-  saveProducts(DEFAULT_PRODUCTS);
+export function browserSavedProducts(): Product[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const items: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(items) ? items.filter(x=>x && typeof x === 'object' && typeof x.id === 'string') as Product[] : [];
+  } catch { return []; }
 }
