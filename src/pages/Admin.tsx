@@ -63,7 +63,7 @@ export default function Admin() {
     if (!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type) || file.size > 3*1024*1024) {
       setError('Choose a JPG, PNG, WebP or GIF image under 3MB.'); return;
     }
-    try { setForm(f=>({...f,image:await readImage(file)})); setError(''); }
+    try { const image = await readImage(file); setForm(f=>({...f,image})); setError(''); }
     catch(e) { setError(errText(e)); }
   }
 
