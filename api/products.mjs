@@ -18,10 +18,30 @@ function dataApi() {
   return { url: url.replace(/\/$/, ''), token };
 }
 
+let cachedAnonymous = { token: '', expiresAt: 0 };
+async function anonymousToken() {
+  if (cachedAnonymous.token && cachedAnonymous.expiresAt > Date.now() + 30000) return cachedAnonymous.token;
+  const url = process.env.NEON_AUTH_URL;
+  if (!url) throw new Error('Neon authentication is not configured');
+  const response = await fetch(url.replace(/\\/$/, '') + '/token/anonymous', {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(12000)
+  });
+  if (!response.ok) throw new Error('Neon authentication unavailable');
+  const payload = await response.json();
+  if (typeof payload.token !== 'string' || !payload.token) throw new Error('Missing anonymous token');
+  const expiryValue = typeof payload.expires_at === 'number' ? payload.expires_at : 0;
+  const expiresAt = expiryValue > 1e12 ? expiryValue : expiryValue > 0 ? expiryValue * 1000 : Date.now() + 5*60*1000;
+  cachedAnonymous = { token: payload.token, expiresAt: Math.max(Date.now() + 30000, expiresAt - 60000) };
+  return payload.token;
+}
+
 async function requestDatabase(url, init = {}) {
+  const token = await anonymousToken();
   const response = await fetch(url, {
     cache: 'no-store',
     ...init,
+    headers: { ...init.headers, Authorization: 'Bearer ' + token },
     signal: AbortSignal.timeout(12000)
   });
   const raw = await response.text();
