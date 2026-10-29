@@ -23,7 +23,7 @@ async function anonymousToken() {
   if (cachedAnonymous.token && cachedAnonymous.expiresAt > Date.now() + 30000) return cachedAnonymous.token;
   const url = process.env.NEON_AUTH_URL;
   if (!url) throw new Error('Neon authentication is not configured');
-  const response = await fetch(url.replace(/\\/$/, '') + '/token/anonymous', {
+  const response = await fetch(url.replace(/[/]$/, '') + '/token/anonymous', {
     cache: 'no-store',
     signal: AbortSignal.timeout(12000)
   });
