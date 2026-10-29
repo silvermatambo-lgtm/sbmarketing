@@ -1,25 +1,27 @@
 # S&B Marketing Motor Sport
 
-React + Vite + Tailwind website with Neon PostgreSQL catalogue, Vercel Blob image uploads and Vercel Functions backend.
+Website built with React, Vite, Tailwind, Neon PostgreSQL and Vercel Blob.
 
-## Required project configuration
+## Shared admin catalogue
 
-In Vercel environment variables configure:
-- `DATABASE_URL`: Neon project sbmarketing pooled PostgreSQL connection string (server-only).
-- `ADMIN_PASSWORD`: strong password used by the owner (server-only).
-- `ADMIN_SESSION_SECRET`: random 32+ byte secret for signed admin session cookie (server-only).
-- `BLOB_READ_WRITE_TOKEN`: auto-provisioned when connecting Vercel Blob to this project.
+Products are stored in a single Neon database. The homepage, gallery, services collection and admin all read from the same source (and re-fetch on focus / every 30 seconds). Product images upload to Vercel Blob, not localStorage. The public Data API has row-level security for **read-only** visitor access. Only the Vercel API backend can write using its private service token and an authenticated admin session.
 
-Never use VITE_ prefixes for secrets or commit an .env with values.
+### Required Vercel environment variables (server-only, no VITE_ prefix)
+- `NEON_DATA_API_URL` — Neon Data API endpoint ending in /rest/v1.
+- `NEON_AUTH_URL` — Neon Managed Auth base URL ending in /auth.
+- `NEON_DATA_API_SERVICE_TOKEN` — backend-only service token whose hash is registered in Neon's internal.service_keys.
+- `ADMIN_PASSWORD` — strong owner password (not bundled into JavaScript).
+- `ADMIN_SESSION_SECRET` — signing secret for 12-hour HttpOnly admin session cookies.
+- `BLOB_READ_WRITE_TOKEN` — added by the linked Vercel Blob store.
 
-## Upgrade from local browser catalogue
-Previously uploaded items were saved to each admin browser under localStorage key `sbmarketing-products-v1`. The owner MUST use the same original device/browser and hostname, sign in to /admin after deployment, then click **Import Saved Browser Items**. The import uploads data URL photos to Blob and records them in Neon, skipping products already in the database. Browser local storage is not remotely retrievable by the developer.
+### Recover older local-only uploads
+Old uploads are in `localStorage['sbmarketing-products-v1']`, only in the browser and exact website domain where the client uploaded them. They **cannot** be accessed via GitHub or Neon until the owner visits /admin on the original browser and clicks **Import Saved Browser Items**. The import uploads locally saved base64 photos to Blob and saves products in Neon, skipping items with IDs that already exist. Do not clear this browser or switch domains before migration.
 
-## Verify
-1. Configure Vercel secrets and deploy.
-2. Visit /api/products and confirm a JSON response with seeded products.
-3. Sign into /admin, import saved browser items, add a new item with photo.
-4. Open the homepage in a private browser on a second device; ensure the new item and photo are visible.
-5. Delete the test item in admin and ensure it disappears after refreshing the public site.
+### Verification
+- `/api/products` returns the seeded catalogue JSON.
+- Sign into `/admin` with the server-side password and add a product and image.
+- Confirm that the product appears on another browser/device across homepage/gallery/services.
+- Delete the test product and verify it disappears.
+- Import older local-only products from the original admin browser.
 
-The public catalogue refreshes on focus and every 30 seconds while visible.
+`npm install && npm run build` checks TypeScript and produces the Vite static frontend.

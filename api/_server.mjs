@@ -1,10 +1,4 @@
-import { neon } from '@neondatabase/serverless';
 import { createHmac, createHash, timingSafeEqual } from 'node:crypto';
-
-export function database() {
-  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not configured');
-  return neon(process.env.DATABASE_URL);
-}
 
 export function json(res, status, data) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
